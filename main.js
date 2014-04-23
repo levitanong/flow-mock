@@ -194,6 +194,7 @@ app.view = function(ctrl){
           id: "input"+node.getId(),
           type: "text", 
           value: node.name(), 
+          autofocus: node.getId() === "0",
           // onchange: m.withAttr("value", node.name),
           config: ctrl.onNodeCreate,
           onkeydown: keyHandler
