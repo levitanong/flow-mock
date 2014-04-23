@@ -124,52 +124,53 @@ app.view = function(ctrl){
     // recursively render a node
     var children;
 
-    var keyHandler = function(){
-      return function(e){
-        node.name("value" in e.currentTarget ? e.currentTarget.value : e.currentTarget.getAttribute("value"));
+    var keyHandler = function(e){
+      node.name("value" in e.currentTarget ? e.currentTarget.value : e.currentTarget.getAttribute("value"));
 
-        if(e.keyCode == 13 && parent){
-          var sibling = ctrl.addNode(parent, new nodes.Node(""));
+      if(e.keyCode == 13 && parent){
+        var sibling = ctrl.addNode(parent, new nodes.Node(""));
 
-          m.redraw(); // redraw to generate element
-          document.getElementById("input"+sibling.getId()).focus();
-        }
-        if(e.keyCode == 9){
-          e.preventDefault();
-          if(e.shiftKey){
-            // turn into sibling of parent
-            var gramps = parent.parent();
-            gramps.addChild(node);
+        m.redraw(); // redraw to generate element
+        document.getElementById("input"+sibling.getId()).focus();
+      }
+      if(e.keyCode == 9){
+        e.preventDefault();
+        if(e.shiftKey){
+          // turn into sibling of parent
+          var gramps = parent.parent();
+          gramps.addChild(node);
+          parent.deleteChild(node);
+          m.redraw();
+          document.getElementById("input"+node.getId()).focus();
+        } else {
+          // turn into child of sibling above it.
+          var nodeIndex = parent.children().indexOf(node);
+          if(nodeIndex > 0){
+            // trigger converting node into child of sibling above.
+            var siblingNodeIndex = nodeIndex - 1;
+            var siblingNode = parent.children()[siblingNodeIndex];
+            var newChild = siblingNode.addChild(node);
             parent.deleteChild(node);
-          } else {
-            // turn into child of sibling above it.
-            var nodeIndex = parent.children().indexOf(node);
-            if(nodeIndex > 0){
-              // trigger converting node into child of sibling above.
-              var siblingNodeIndex = nodeIndex - 1;
-              var siblingNode = parent.children()[siblingNodeIndex];
-              var newChild = siblingNode.addChild(node);
-              parent.deleteChild(node);
 
-              m.redraw(); // redraw to generate element
-              document.getElementById("input"+newChild.getId()).focus();
-            }
+            m.redraw(); // redraw to generate element
+            document.getElementById("input"+newChild.getId()).focus();
           }
         }
-        if(e.keyCode == 8 && !e.currentTarget.value){
-          e.preventDefault();
-          var nodeIndex = parent.children().indexOf(node);
-          parent.deleteChild(node);
+      }
+      if(e.keyCode == 8 && !e.currentTarget.value){
+        e.preventDefault();
+        var nodeIndex = parent.children().indexOf(node);
 
+        if(!(!node.parent().parent() && nodeIndex === 0)){
+          parent.deleteChild(node);
           if(nodeIndex){
             var siblingNodeIndex = nodeIndex - 1;
             document.getElementById("input"+parent.children()[siblingNodeIndex].getId()).focus();
           } else {
             document.getElementById("input"+parent.getId()).focus();
           }
-          
-        };
-      }
+        }
+      };
     }
 
     if(node.children().constructor === Array){
@@ -195,7 +196,7 @@ app.view = function(ctrl){
           value: node.name(), 
           // onchange: m.withAttr("value", node.name),
           config: ctrl.onNodeCreate,
-          onkeydown: keyHandler()
+          onkeydown: keyHandler
         }),
         m("select", {onchange: m.withAttr("value", node.condition)}, [
           _.map(bools, function(f, key){
