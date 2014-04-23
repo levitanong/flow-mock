@@ -198,11 +198,13 @@ app.view = function(ctrl){
           config: ctrl.onNodeCreate,
           onkeydown: keyHandler
         }),
-        m("select", {onchange: m.withAttr("value", node.condition)}, [
-          _.map(bools, function(f, key){
-            return m("option", {selected: (key === "AND") ? true : false }, key);
-          })
-        ]),
+        node.children().length > 1 ?
+          m("select", {onchange: m.withAttr("value", node.condition)}, [
+            _.map(bools, function(f, key){
+              return m("option", {selected: (key === "AND") ? true : false }, key);
+            })
+          ])
+        : null
         // m("button", {onclick: function(){ 
         //   ctrl.addNode(node, new nodes.Node(""));
         // }}, "Add"),
