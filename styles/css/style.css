@@ -1,0 +1,7 @@
+.node {
+  margin-left: 20px; }
+  .node input {
+    border: 0;
+    outline: 0; }
+    .node input:focus {
+      background-color: #eeeeee; }
