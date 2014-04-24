@@ -80,6 +80,9 @@ nodes.Node = function(name, value, children, parent){
       return null
     }
   }
+  this.getSiblings = function(){
+    return this.parent().children();
+  }
 
   this.addChild = function(child){
     child.parent(this);
@@ -111,6 +114,9 @@ nodes.Node = function(name, value, children, parent){
   }
   this.getInputId = function(){
     return "input" + this.getId();
+  }
+  this.getNodeId = function(){
+    return "n" + this.getId();
   }
   this.getGeneration = function(){
     var innerLoop = function(curGen, node){
@@ -148,6 +154,11 @@ app.controller = function(){
     // console.log(elem.value);
     // elem.focus();
   }
+  this.setFocus = function(node){
+    this.focus(node.getInputId());
+    document.getElementById(node.getInputId()).focus();
+    return node;
+  }
 }
 
 
@@ -164,8 +175,7 @@ app.view = function(ctrl){
         var sibling = ctrl.insertNode(parent, new nodes.Node(""), node.getIndex() + 1);
 
         m.redraw(); // redraw to generate element
-        ctrl.focus("n"+sibling.getId());
-        document.getElementById(sibling.getInputId()).focus();
+        ctrl.setFocus(sibling);
       }
       if(e.keyCode == 9){
         e.preventDefault();
@@ -175,7 +185,8 @@ app.view = function(ctrl){
           gramps.addChild(node);
           parent.deleteChild(node);
           m.redraw();
-          document.getElementById(node.getInputId()).focus();
+
+          ctrl.setFocus(node);
         } else {
           // turn into child of sibling above it.
           var nodeIndex = node.getIndex();
@@ -187,8 +198,7 @@ app.view = function(ctrl){
             parent.deleteChild(node);
 
             m.redraw(); // redraw to generate element
-            ctrl.focus("n"+newChild.getId());
-            document.getElementById(newChild.getInputId()).focus();
+            ctrl.setFocus(newChild);
           }
         }
       }
@@ -200,23 +210,35 @@ app.view = function(ctrl){
           parent.deleteChild(node);
           if(nodeIndex){
             var siblingNodeIndex = nodeIndex - 1;
-            ctrl.focus("n"+sibling.parent.children()[siblingNodeIndex].getId());
-            document.getElementById(parent.children()[siblingNodeIndex].getInputId()).focus();
+            var sibling = parent.children()[siblingNodeIndex];
+            ctrl.setFocus(sibling);
           } else {
-            ctrl.focus("n"+parent.getId());
-            document.getElementById(parent.getInputId()).focus();
+            ctrl.setFocus(parent);
           }
         }
       };
       if(e.keyCode == 40){
         // down
 
+        var findNextYoungerSibling = function(node){
+          var siblingIndex = node.getIndex() + 1
+          if(node.getSiblings().length - 1 >= siblingIndex) {
+            return node.getSiblings()[siblingIndex];
+          } else {
+            return findNextYoungerSibling(node.parent());
+          }
+        }
+        var nextNode = findNextYoungerSibling(node)
+        ctrl.setFocus(nextNode);
       }
       if(e.keyCode == 38){
-        // up
+        var nodeIndex = node.getIndex();
+        if (nodeIndex === 0) {
+          // oldest child. go to parent.
+        };
       }
 
-      console.log(e.keyCode);
+      // console.log(e.keyCode);
     }
 
     if(node.children().constructor === Array){
