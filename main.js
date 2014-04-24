@@ -78,6 +78,13 @@ nodes.Node = function(name, value, children, parent){
     this.children(this.children().concat(child));
     return child;
   }
+  this.insertChild = function(child, index){
+    child.parent(this);
+    var children = this.children();
+    children.splice(index, 0, child);
+    this.children(children);
+    return child;
+  }
   this.deleteChild = function(child){
     var arrCopy = this.children();
     var childIndex = arrCopy.indexOf(child);
@@ -107,6 +114,9 @@ app.controller = function(){
   this.addNode = function(parent, child){
     return parent.addChild(child);
   }
+  this.insertNode = function(parent, child, index){
+    return parent.insertChild(child, index);
+  }
   this.deleteNode = function(parent, child){
     parent.deleteChild(child);
   }
@@ -128,7 +138,7 @@ app.view = function(ctrl){
       node.name("value" in e.currentTarget ? e.currentTarget.value : e.currentTarget.getAttribute("value"));
 
       if(e.keyCode == 13 && parent){
-        var sibling = ctrl.addNode(parent, new nodes.Node(""));
+        var sibling = ctrl.insertNode(parent, new nodes.Node(""), parent.children().indexOf(node) + 1);
 
         m.redraw(); // redraw to generate element
         document.getElementById("input"+sibling.getId()).focus();
