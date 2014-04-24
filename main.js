@@ -79,6 +79,9 @@ nodes.Node = function(name, value, children, parent){
     return child;
   }
   this.insertChild = function(child, index){
+    if(typeof(index) === "undefined"){
+      index = this.children().length;
+    }
     child.parent(this);
     var children = this.children();
     children.splice(index, 0, child);
@@ -100,6 +103,16 @@ nodes.Node = function(name, value, children, parent){
       return "";
     }
   }
+  this.getGeneration = function(){
+    var innerLoop = function(curGen, node){
+      if(node.parent()){
+        return innerLoop(curGen+1, node.parent());
+      } else {
+        return curGen
+      }
+    }
+    return innerLoop(0, this);
+  }
 }
 
 var app = {}
@@ -110,9 +123,10 @@ app.data.addChild(new nodes.Node(""));
 app.controller = function(){
   this.input = {};
   this.data = app.data;
+  this.focus = m.prop("n0");
 
-  this.addNode = function(parent, child){
-    return parent.addChild(child);
+  this.isNodeInFocus = function(node){
+    return this.focus() === "n" + node.getId()
   }
   this.insertNode = function(parent, child, index){
     return parent.insertChild(child, index);
@@ -141,6 +155,7 @@ app.view = function(ctrl){
         var sibling = ctrl.insertNode(parent, new nodes.Node(""), parent.children().indexOf(node) + 1);
 
         m.redraw(); // redraw to generate element
+        ctrl.focus("n"+sibling.getId());
         document.getElementById("input"+sibling.getId()).focus();
       }
       if(e.keyCode == 9){
@@ -163,6 +178,7 @@ app.view = function(ctrl){
             parent.deleteChild(node);
 
             m.redraw(); // redraw to generate element
+            ctrl.focus("n"+newChild.getId());
             document.getElementById("input"+newChild.getId()).focus();
           }
         }
@@ -175,8 +191,10 @@ app.view = function(ctrl){
           parent.deleteChild(node);
           if(nodeIndex){
             var siblingNodeIndex = nodeIndex - 1;
+            ctrl.focus("n"+sibling.parent.children()[siblingNodeIndex].getId());
             document.getElementById("input"+parent.children()[siblingNodeIndex].getId()).focus();
           } else {
+            ctrl.focus("n"+parent.getId());
             document.getElementById("input"+parent.getId()).focus();
           }
         }
@@ -194,34 +212,45 @@ app.view = function(ctrl){
     }
 
     return m(".node", {id: "n"+node.getId()}, [
-      m(".info",[
-        m("input", {
-          type: "checkbox", 
-          onchange: m.withAttr("checked", node.value), 
-          checked: node.getValue()
-        }),
-        m("input", {
-          id: "input"+node.getId(),
-          type: "text", 
-          value: node.name(), 
-          autofocus: node.getId() === "0",
-          // onchange: m.withAttr("value", node.name),
-          config: ctrl.onNodeCreate,
-          onkeydown: keyHandler
-        }),
-        node.children().length > 1 ?
-          m("select", {onchange: m.withAttr("value", node.condition)}, [
-            _.map(bools, function(f, key){
-              return m("option", {selected: (key === "AND") ? true : false }, key);
-            })
-          ])
-        : null
-        // m("button", {onclick: function(){ 
-        //   ctrl.addNode(node, new nodes.Node(""));
-        // }}, "Add"),
-        // m("button", {onclick: function(){ 
-        //   ctrl.deleteNode(parent, node);
-        // }}, "Delete")
+      m(".info", {
+        className: ctrl.isNodeInFocus(node) ? "focus" : "",
+        onclick: function(e){
+          document.getElementById("input"+node.getId()).focus();
+        }
+      }, [
+        m(".details", 
+        {style: {"padding-left": (node.getGeneration() - 1) * 20 + "px"}}, [
+          m("input", {
+            type: "checkbox", 
+            onchange: m.withAttr("checked", node.value), 
+            checked: node.getValue()
+          }),
+          m("input", {
+            id: "input"+node.getId(),
+            type: "text", 
+            value: node.name(), 
+            autofocus: node.getId() === "0",
+            onfocus: function(e){
+              ctrl.focus("n"+node.getId());
+            },
+            // onchange: m.withAttr("value", node.name),
+            config: ctrl.onNodeCreate,
+            onkeydown: keyHandler
+          }),
+          node.children().length > 1 ?
+            m("select", {onchange: m.withAttr("value", node.condition)}, [
+              _.map(bools, function(f, key){
+                return m("option", {selected: (key === "AND") ? true : false }, key);
+              })
+            ])
+          : null
+          // m("button", {onclick: function(){ 
+          //   ctrl.addNode(node, new nodes.Node(""));
+          // }}, "Add"),
+          // m("button", {onclick: function(){ 
+          //   ctrl.deleteNode(parent, node);
+          // }}, "Delete")
+        ]),
       ]),
       m(".children", [
         children
@@ -230,7 +259,8 @@ app.view = function(ctrl){
   }
   return m("html", [
     m("head", [
-      m("link", {rel: "stylesheet", href: "styles/css/style.css"})
+      m("link", {rel: "stylesheet", href: "styles/css/style.css"}),
+      m("link[href='//fonts.googleapis.com/css?family=Roboto+Condensed:400,300,700'][rel='stylesheet'][type='text/css']"),
     ]),
     m("body", [
       m("div", [

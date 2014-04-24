@@ -1,7 +1,35 @@
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; }
+
+body {
+  margin: 0; }
+
 .node {
-  margin-left: 20px; }
+  font-size: 18px;
+  font-weight: 300;
+  font-family: "Roboto Condensed"; }
+  .node .info {
+    cursor: text; }
+    .node .info .details {
+      *zoom: 1;
+      max-width: 68em;
+      margin-left: auto;
+      margin-right: auto; }
+      .node .info .details:before, .node .info .details:after {
+        content: " ";
+        display: table; }
+      .node .info .details:after {
+        clear: both; }
+    .node .info.focus, .node .info.focus:hover {
+      background-color: #eeeeee; }
+    .node .info:hover {
+      background-color: #f4f4f4; }
   .node input {
     border: 0;
-    outline: 0; }
-    .node input:focus {
-      background-color: #eeeeee; }
+    outline: 0;
+    background-color: transparent;
+    font-size: 18px;
+    font-weight: 300;
+    font-family: "Roboto Condensed"; }
