@@ -73,6 +73,14 @@ nodes.Node = function(name, value, children, parent){
     }
   }.bind(this);
 
+  this.getIndex = function(){
+    if(this.parent()){
+      return this.parent().children().indexOf(this);
+    } else {
+      return null
+    }
+  }
+
   this.addChild = function(child){
     child.parent(this);
     this.children(this.children().concat(child));
@@ -96,12 +104,13 @@ nodes.Node = function(name, value, children, parent){
   }
   this.getId = function(){
     if(this.parent()){
-      var myIndex = this.parent().children().indexOf(this);
-      // console.log(myIndex, this.parent().getId());
-      return this.parent().getId() + "" + myIndex;
+      return this.parent().getId() + "" + this.getIndex();
     } else {
       return "";
     }
+  }
+  this.getInputId = function(){
+    return "input" + this.getId();
   }
   this.getGeneration = function(){
     var innerLoop = function(curGen, node){
@@ -152,11 +161,11 @@ app.view = function(ctrl){
       node.name("value" in e.currentTarget ? e.currentTarget.value : e.currentTarget.getAttribute("value"));
 
       if(e.keyCode == 13 && parent){
-        var sibling = ctrl.insertNode(parent, new nodes.Node(""), parent.children().indexOf(node) + 1);
+        var sibling = ctrl.insertNode(parent, new nodes.Node(""), node.getIndex() + 1);
 
         m.redraw(); // redraw to generate element
         ctrl.focus("n"+sibling.getId());
-        document.getElementById("input"+sibling.getId()).focus();
+        document.getElementById(sibling.getInputId()).focus();
       }
       if(e.keyCode == 9){
         e.preventDefault();
@@ -166,10 +175,10 @@ app.view = function(ctrl){
           gramps.addChild(node);
           parent.deleteChild(node);
           m.redraw();
-          document.getElementById("input"+node.getId()).focus();
+          document.getElementById(node.getInputId()).focus();
         } else {
           // turn into child of sibling above it.
-          var nodeIndex = parent.children().indexOf(node);
+          var nodeIndex = node.getIndex();
           if(nodeIndex > 0){
             // trigger converting node into child of sibling above.
             var siblingNodeIndex = nodeIndex - 1;
@@ -179,26 +188,35 @@ app.view = function(ctrl){
 
             m.redraw(); // redraw to generate element
             ctrl.focus("n"+newChild.getId());
-            document.getElementById("input"+newChild.getId()).focus();
+            document.getElementById(newChild.getInputId()).focus();
           }
         }
       }
       if(e.keyCode == 8 && !e.currentTarget.value){
         e.preventDefault();
-        var nodeIndex = parent.children().indexOf(node);
+        var nodeIndex = node.getIndex();
 
         if(!(!node.parent().parent() && nodeIndex === 0)){
           parent.deleteChild(node);
           if(nodeIndex){
             var siblingNodeIndex = nodeIndex - 1;
             ctrl.focus("n"+sibling.parent.children()[siblingNodeIndex].getId());
-            document.getElementById("input"+parent.children()[siblingNodeIndex].getId()).focus();
+            document.getElementById(parent.children()[siblingNodeIndex].getInputId()).focus();
           } else {
             ctrl.focus("n"+parent.getId());
-            document.getElementById("input"+parent.getId()).focus();
+            document.getElementById(parent.getInputId()).focus();
           }
         }
       };
+      if(e.keyCode == 40){
+        // down
+
+      }
+      if(e.keyCode == 38){
+        // up
+      }
+
+      console.log(e.keyCode);
     }
 
     if(node.children().constructor === Array){
@@ -215,7 +233,7 @@ app.view = function(ctrl){
       m(".info", {
         className: ctrl.isNodeInFocus(node) ? "focus" : "",
         onclick: function(e){
-          document.getElementById("input"+node.getId()).focus();
+          document.getElementById(node.getInputId()).focus();
         }
       }, [
         m(".details", 
@@ -244,12 +262,6 @@ app.view = function(ctrl){
               })
             ])
           : null
-          // m("button", {onclick: function(){ 
-          //   ctrl.addNode(node, new nodes.Node(""));
-          // }}, "Add"),
-          // m("button", {onclick: function(){ 
-          //   ctrl.deleteNode(parent, node);
-          // }}, "Delete")
         ]),
       ]),
       m(".children", [
