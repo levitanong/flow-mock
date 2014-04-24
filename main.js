@@ -128,6 +128,17 @@ nodes.Node = function(name, value, children, parent){
     }
     return innerLoop(0, this);
   }
+  this.youngestDescendant = function(){
+    var innerLoop = function(node){
+      if (!node.children().length) {
+        // no children
+        return node;
+      } else {
+        return innerLoop(_.last(node.children()))
+      }
+    }
+    return innerLoop(this);
+  }.bind(this);
 }
 
 var app = {}
@@ -219,23 +230,35 @@ app.view = function(ctrl){
       };
       if(e.keyCode == 40){
         // down
-
-        var findNextYoungerSibling = function(node){
-          var siblingIndex = node.getIndex() + 1
-          if(node.getSiblings().length - 1 >= siblingIndex) {
-            return node.getSiblings()[siblingIndex];
-          } else {
-            return findNextYoungerSibling(node.parent());
+        if(node.children().length){
+          // has children
+          ctrl.setFocus(node.children()[0])
+        } else {
+          // terminal
+          var findNextYoungerSibling = function(node){
+            var siblingIndex = node.getIndex() + 1
+            if(node.getSiblings().length - 1 >= siblingIndex) {
+              return node.getSiblings()[siblingIndex];
+            } else {
+              return findNextYoungerSibling(node.parent());
+            }
           }
+          var nextNode = findNextYoungerSibling(node)
+          ctrl.setFocus(nextNode);
         }
-        var nextNode = findNextYoungerSibling(node)
-        ctrl.setFocus(nextNode);
       }
       if(e.keyCode == 38){
         var nodeIndex = node.getIndex();
         if (nodeIndex === 0) {
           // oldest child. go to parent.
-        };
+          ctrl.setFocus(node.parent());
+
+        } else {
+          // else, go to youngest decendant of elder sibling.
+          var olderSibling = node.getSiblings()[node.getIndex() - 1];
+          // console.log(node.youngestDescendant());
+          ctrl.setFocus(olderSibling.youngestDescendant());
+        }
       }
 
       // console.log(e.keyCode);
