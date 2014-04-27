@@ -45,7 +45,7 @@ body {
           width: 12px;
           margin: 2px;
           border-radius: 50%;
-          background-color: rgba(0, 0, 0, 0.05); }
+          background-color: transparent; }
           .node label input[type="checkbox"] + .checkbox .tick:hover {
             background-color: rgba(0, 0, 0, 0.1); }
       .node label input[type="checkbox"]:checked + .checkbox .tick {
