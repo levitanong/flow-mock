@@ -13,25 +13,14 @@ bools.OR = function(arr){
   })
 }
 
-// bools.NOT = function(a){
-//   return !a;
-// }
-
 bools.XOR = function(arr){
   return _.compact(arr).length === 1
 }
-
-// bools.ID = function(a){
-//   return a;
-// }
-
-// model
 
 var nodes = {}
 nodes.Node = function(name, value, children, parent){
   if(typeof(value) === "undefined") value = false;
   if(typeof(children) === "undefined") children = [];
-  // if(typeof(condition) === "undefined") condition = "AND";
   if(typeof(parent) === "undefined") parent = null;
   this.name = m.prop(name);
   this.value = m.prop(value);
@@ -301,7 +290,6 @@ app.view = function(ctrl){
             onfocus: function(e){
               ctrl.focus("n"+node.getId());
             },
-            // onchange: m.withAttr("value", node.name),
             config: ctrl.onNodeCreate,
             onkeydown: keyHandler
           }),
