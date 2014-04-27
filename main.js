@@ -138,10 +138,12 @@ app.data.addChild(new nodes.Node(""));
 app.controller = function(){
   this.input = {};
   this.data = app.data;
-  this.focus = m.prop("n0");
+  // this.focus = m.prop("n0");
+  this.focus = m.prop(this.data.children()[0]);
 
   this.isNodeInFocus = function(node){
-    return this.focus() === "n" + node.getId()
+    // return this.focus() === "n" + node.getId()
+    return this.focus().getNodeId() === node.getNodeId();
   }
   this.insertNode = function(parent, child, index){
     return parent.insertChild(child, index);
@@ -155,9 +157,11 @@ app.controller = function(){
     // elem.focus();
   }
   this.setFocus = function(node){
-    this.focus(node.getInputId());
-    document.getElementById(node.getInputId()).focus();
-    return node;
+    if(node && node.getId()){
+      this.focus(node);
+      document.getElementById(node.getInputId()).focus();
+      return node;
+    }
   }
 }
 
@@ -182,11 +186,13 @@ app.view = function(ctrl){
         if(e.shiftKey){
           // turn into sibling of parent
           var gramps = parent.parent();
-          gramps.addChild(node);
-          parent.deleteChild(node);
-          m.redraw();
+          if(gramps){
+            gramps.addChild(node);
+            parent.deleteChild(node);
+            m.redraw();
 
-          ctrl.setFocus(node);
+            ctrl.setFocus(node);
+          }
         } else {
           // turn into child of sibling above it.
           var nodeIndex = node.getIndex();
@@ -249,7 +255,9 @@ app.view = function(ctrl){
           ctrl.setFocus(olderSibling.youngestDescendant());
         }
       }
-
+      if (e.keyCode == 191) {
+        // ctrl.focus().
+      };
       // console.log(e.keyCode);
     }
 
@@ -288,7 +296,7 @@ app.view = function(ctrl){
             value: node.name(), 
             autofocus: node.getId() === "0",
             onfocus: function(e){
-              ctrl.focus("n"+node.getId());
+              ctrl.focus(node);
             },
             config: ctrl.onNodeCreate,
             onkeydown: keyHandler
