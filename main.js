@@ -283,11 +283,16 @@ app.view = function(ctrl){
       }, [
         m(".details", 
         {style: {"padding-left": (node.getGeneration() - 1) * 20 + "px"}}, [
-          m("input", {
-            type: "checkbox", 
-            onchange: m.withAttr("checked", node.value), 
-            checked: node.getValue()
-          }),
+          m("label", [
+            m("input", {
+              type: "checkbox", 
+              onchange: m.withAttr("checked", node.value), 
+              checked: node.getValue()
+            }),
+            m(".checkbox", [
+              m(".tick")
+            ]),
+          ]),
           m("input", {
             id: "input"+node.getId(),
             type: "text", 
@@ -318,6 +323,7 @@ app.view = function(ctrl){
     m("head", [
       m("link", {rel: "stylesheet", href: "styles/css/style.css"}),
       m("link[href='//fonts.googleapis.com/css?family=Roboto+Condensed:400,300,700'][rel='stylesheet'][type='text/css']"),
+      m("link[href='bower_components/font-awesome/css/font-awesome.css'][rel='stylesheet'][type='text/css']"),
     ]),
     m("body", [
       m("div", [

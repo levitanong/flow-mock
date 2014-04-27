@@ -14,7 +14,7 @@ body {
     cursor: text; }
     .node .info .details {
       *zoom: 1;
-      max-width: 68em;
+      max-width: 940px;
       margin-left: auto;
       margin-right: auto; }
       .node .info .details:before, .node .info .details:after {
@@ -26,7 +26,33 @@ body {
       background-color: #eeeeee; }
     .node .info:hover {
       background-color: #f4f4f4; }
-  .node input {
+  .node label {
+    cursor: pointer;
+    margin-right: 10px; }
+    .node label input[type="checkbox"] {
+      display: none; }
+      .node label input[type="checkbox"] i {
+        color: gray; }
+      .node label input[type="checkbox"] + .checkbox {
+        display: inline-block;
+        background-color: white;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.1); }
+        .node label input[type="checkbox"] + .checkbox .tick {
+          height: 12px;
+          width: 12px;
+          margin: 2px;
+          border-radius: 50%;
+          background-color: rgba(0, 0, 0, 0.05); }
+          .node label input[type="checkbox"] + .checkbox .tick:hover {
+            background-color: rgba(0, 0, 0, 0.1); }
+      .node label input[type="checkbox"]:checked + .checkbox .tick {
+        background-color: #333333; }
+        .node label input[type="checkbox"]:checked + .checkbox .tick:hover {
+          background-color: black; }
+  .node input[type="text"] {
     border: 0;
     outline: 0;
     background-color: transparent;
