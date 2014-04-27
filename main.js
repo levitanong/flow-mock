@@ -70,7 +70,11 @@ nodes.Node = function(name, value, children, parent){
     }
   }
   this.getSiblings = function(){
-    return this.parent().children();
+    if (this.parent()){
+      return this.parent().children();
+    } else {
+      return [];
+    }
   }
 
   this.addChild = function(child){
@@ -188,6 +192,7 @@ app.view = function(ctrl){
           var gramps = parent.parent();
           if(gramps){
             gramps.addChild(node);
+            // var sibling = ctrl.insertNode(parent, new nodes.Node(""), node.getIndex() + 1);
             parent.deleteChild(node);
             m.redraw();
 
@@ -234,8 +239,10 @@ app.view = function(ctrl){
             var siblingIndex = node.getIndex() + 1
             if(node.getSiblings().length - 1 >= siblingIndex) {
               return node.getSiblings()[siblingIndex];
-            } else {
+            } else if (node.parent()) {
               return findNextYoungerSibling(node.parent());
+            } else {
+              return null
             }
           }
           var nextNode = findNextYoungerSibling(node)
@@ -256,7 +263,7 @@ app.view = function(ctrl){
         }
       }
       if (e.keyCode == 191) {
-        // ctrl.focus().
+        ctrl.focus().value(!ctrl.focus().value());
       };
       // console.log(e.keyCode);
     }
