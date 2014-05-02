@@ -22,6 +22,9 @@ body {
         display: table; }
       .node .info .details:after {
         clear: both; }
+      .node .info .details.root input {
+        font-size: 36px;
+        font-weight: bold; }
     .node .info.focus, .node .info.focus:hover {
       background-color: #eeeeee; }
     .node .info:hover {
