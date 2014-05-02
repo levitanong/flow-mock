@@ -102,7 +102,7 @@ nodes.Node = function(name, value, children, parent){
   this.getNodeId = function(){
     return "n" + this.getId();
   }
-  this.getGeneration = function(){
+  this.generation = function(){
     var innerLoop = function(curGen, node){
       if(node.parent()){
         return innerLoop(curGen+1, node.parent());
@@ -147,7 +147,7 @@ app.controller = function(){
     parent.deleteChild(child);
   }
   this.setFocus = function(node){
-    if(node && node.getId()){
+    if(node){
       this.focus(node);
       document.getElementById(node.getInputId()).focus();
       return node;
@@ -251,15 +251,19 @@ app.view = function(ctrl){
           // oldest child. go to parent.
           ctrl.setFocus(oldParent);
 
-        } else {
+        } else if (oldParent) {
           // else, go to youngest decendant of elder sibling.
           var olderSibling = node.siblings()[node.getIndex() - 1];
           ctrl.setFocus(olderSibling.youngestDescendant());
+        } else {
+          null
         }
       }
-      if (e.keyCode == 191) {
-        ctrl.focus().value(!ctrl.focus().value());
-      };
+
+      // slash key. rethink this.
+      // if (e.keyCode == 191) {
+      //   ctrl.focus().value(!ctrl.focus().value());
+      // };
     }
 
     if(node.children().constructor === Array){
@@ -280,7 +284,7 @@ app.view = function(ctrl){
         }
       }, [
         m(".details", 
-        {style: {"padding-left": (node.getGeneration() - 1) * 20 + "px"}}, [
+        {style: {"padding-left": (node.generation() - 1) * 20 + "px"}, className: (node.generation() === 0) ? "root" : ""}, [
           m("label", [
             m("input", {
               type: "checkbox", 
