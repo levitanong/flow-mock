@@ -158,9 +158,10 @@ app.controller = function(){
 
 app.view = function(ctrl){
 
-  var renderNode = function(node, parent){
+  var renderNode = function(node){
     // recursively render a node
     var children;
+    var oldParent = node.parent();
 
     var keyHandler = function(e){
       node.name("value" in e.currentTarget ? e.currentTarget.value : e.currentTarget.getAttribute("value"));
@@ -178,7 +179,6 @@ app.view = function(ctrl){
           // turn into sibling of parent
           var gramps = node.parent().parent();
           if(gramps){
-            var oldParent = node.parent()
             var newIndex = oldParent.getIndex() + 1;
             var sibling = ctrl.insertNode(gramps, node, newIndex)
             ctrl.deleteNode(oldParent, node)
@@ -192,9 +192,9 @@ app.view = function(ctrl){
           if(nodeIndex > 0){
             // trigger converting node into child of sibling above.
             var siblingNodeIndex = nodeIndex - 1;
-            var siblingNode = parent.children()[siblingNodeIndex];
+            var siblingNode = oldParent.children()[siblingNodeIndex];
             var newChild = ctrl.insertNode(siblingNode, node)
-            parent.deleteChild(node);
+            oldParent.deleteChild(node);
 
             m.redraw(); // redraw to generate element
             ctrl.setFocus(newChild);
@@ -206,14 +206,14 @@ app.view = function(ctrl){
         e.preventDefault();
         var nodeIndex = node.getIndex();
 
-        if(!(!node.parent().parent() && nodeIndex === 0)){
-          parent.deleteChild(node);
+        if(!(!oldParent.parent() && nodeIndex === 0)){
+          oldParent.deleteChild(node);
           if(nodeIndex){
             var siblingNodeIndex = nodeIndex - 1;
-            var sibling = parent.children()[siblingNodeIndex];
+            var sibling = oldParent.children()[siblingNodeIndex];
             ctrl.setFocus(sibling);
           } else {
-            ctrl.setFocus(parent);
+            ctrl.setFocus(oldParent);
           }
         }
       };
@@ -243,7 +243,7 @@ app.view = function(ctrl){
         var nodeIndex = node.getIndex();
         if (nodeIndex === 0) {
           // oldest child. go to parent.
-          ctrl.setFocus(node.parent());
+          ctrl.setFocus(oldParent);
 
         } else {
           // else, go to youngest decendant of elder sibling.
@@ -255,7 +255,6 @@ app.view = function(ctrl){
       if (e.keyCode == 191) {
         ctrl.focus().value(!ctrl.focus().value());
       };
-      // console.log(e.keyCode);
     }
 
     if(node.children().constructor === Array){
@@ -320,8 +319,9 @@ app.view = function(ctrl){
     ]),
     m("body", [
       m("div", [
+
         ctrl.data.children().map(function(n){
-          return renderNode(n, ctrl.data);
+          return renderNode(n);
         })
         // recursive function maybe to render all the information of the nodes and their children.
         // renderNode(ctrl.data, null)
