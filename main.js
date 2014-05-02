@@ -61,7 +61,7 @@ nodes.Node = function(name, value, children, parent){
 
   this.getIndex = function(){
     if(this.parent()){
-      return this.parent().children().indexOf(this);
+      return this.siblings().indexOf(this);
     } else {
       return null
     }
@@ -230,9 +230,9 @@ app.view = function(ctrl){
           // terminal
           var findNextYoungerSibling = function(node){
             var siblingIndex = node.getIndex() + 1
-            // console.log(node.siblings()().length, siblingIndex);
-            if(node.siblings()().length - 1 >= siblingIndex) {
-              return node.siblings()()[siblingIndex];
+            // console.log(node.siblings().length, siblingIndex);
+            if(node.siblings().length - 1 >= siblingIndex) {
+              return node.siblings()[siblingIndex];
             } else if (node.parent().parent()) {
               return findNextYoungerSibling(node.parent());
             } else {
@@ -253,7 +253,7 @@ app.view = function(ctrl){
 
         } else {
           // else, go to youngest decendant of elder sibling.
-          var olderSibling = node.siblings()()[node.getIndex() - 1];
+          var olderSibling = node.siblings()[node.getIndex() - 1];
           ctrl.setFocus(olderSibling.youngestDescendant());
         }
       }
