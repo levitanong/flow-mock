@@ -284,7 +284,7 @@ app.view = function(ctrl){
         }
       }, [
         m(".details", 
-        {style: {"padding-left": (node.generation() - 1) * 20 + "px"}, className: (node.generation() === 0) ? "root" : ""}, [
+        {style: {"padding-left": node.generation() * 20 + "px"}, className: (node.generation() === 0) ? "root" : ""}, [
           m("label", [
             m("input", {
               type: "checkbox", 
