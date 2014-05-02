@@ -39,9 +39,6 @@ nodes.Node = function(name, value, children, parent){
       case "OR":
         func = bools.OR;
         break;
-      // case "NOT":
-      //   func = bools.NOT;
-      //   break;
       case "XOR":
         func = bools.XOR;
         break;
@@ -75,12 +72,6 @@ nodes.Node = function(name, value, children, parent){
     } else {
       return [];
     }
-  }
-
-  this.addChild = function(child){
-    child.parent(this);
-    this.children(this.children().concat(child));
-    return child;
   }
   this.insertChild = function(child, index){
     if(typeof(index) === "undefined"){
@@ -137,7 +128,7 @@ nodes.Node = function(name, value, children, parent){
 var app = {}
 
 app.data = new nodes.Node("Root", false, []);
-app.data.addChild(new nodes.Node(""));
+app.data.insertChild(new nodes.Node(""));
 
 app.controller = function(){
   this.input = {};
@@ -154,11 +145,6 @@ app.controller = function(){
   }
   this.deleteNode = function(parent, child){
     parent.deleteChild(child);
-  }
-  this.onNodeCreate = function(elem){
-    // console.log(elem.children[0].children[1]);
-    // console.log(elem.value);
-    // elem.focus();
   }
   this.setFocus = function(node){
     if(node && node.getId()){
@@ -179,24 +165,25 @@ app.view = function(ctrl){
     var keyHandler = function(e){
       node.name("value" in e.currentTarget ? e.currentTarget.value : e.currentTarget.getAttribute("value"));
 
-      if(e.keyCode == 13 && parent){
-        var sibling = ctrl.insertNode(parent, new nodes.Node(""), node.getIndex() + 1);
+      if(e.keyCode == 13 && node.parent()){
+        var sibling = ctrl.insertNode(node.parent(), new nodes.Node(""), node.getIndex() + 1);
 
         m.redraw(); // redraw to generate element
         ctrl.setFocus(sibling);
       }
+      // tab
       if(e.keyCode == 9){
         e.preventDefault();
         if(e.shiftKey){
           // turn into sibling of parent
-          var gramps = parent.parent();
+          var gramps = node.parent().parent();
           if(gramps){
-            gramps.addChild(node);
-            // var sibling = ctrl.insertNode(parent, new nodes.Node(""), node.getIndex() + 1);
-            parent.deleteChild(node);
+            var newIndex = node.parent().getIndex() + 1;
+            var sibling = ctrl.insertNode(gramps, node, newIndex)
+            ctrl.deleteNode(node.parent(), node)
             m.redraw();
 
-            ctrl.setFocus(node);
+            ctrl.setFocus(sibling);
           }
         } else {
           // turn into child of sibling above it.
@@ -205,7 +192,7 @@ app.view = function(ctrl){
             // trigger converting node into child of sibling above.
             var siblingNodeIndex = nodeIndex - 1;
             var siblingNode = parent.children()[siblingNodeIndex];
-            var newChild = siblingNode.addChild(node);
+            var newChild = ctrl.insertNode(siblingNode, node)
             parent.deleteChild(node);
 
             m.redraw(); // redraw to generate element
@@ -213,6 +200,7 @@ app.view = function(ctrl){
           }
         }
       }
+      // delete
       if(e.keyCode == 8 && !e.currentTarget.value){
         e.preventDefault();
         var nodeIndex = node.getIndex();
@@ -237,9 +225,10 @@ app.view = function(ctrl){
           // terminal
           var findNextYoungerSibling = function(node){
             var siblingIndex = node.getIndex() + 1
+            // console.log(node.getSiblings().length, siblingIndex);
             if(node.getSiblings().length - 1 >= siblingIndex) {
               return node.getSiblings()[siblingIndex];
-            } else if (node.parent()) {
+            } else if (node.parent().parent()) {
               return findNextYoungerSibling(node.parent());
             } else {
               return null
