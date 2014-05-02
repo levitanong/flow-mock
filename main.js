@@ -127,7 +127,7 @@ nodes.Node = function(name, value, children, parent){
 
 var app = {}
 
-app.data = new nodes.Node("Root", false, []);
+app.data = new nodes.Node("My Checklist", false, []);
 app.data.insertChild(new nodes.Node(""));
 
 app.controller = function(){
