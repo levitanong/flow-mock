@@ -178,9 +178,10 @@ app.view = function(ctrl){
           // turn into sibling of parent
           var gramps = node.parent().parent();
           if(gramps){
-            var newIndex = node.parent().getIndex() + 1;
+            var oldParent = node.parent()
+            var newIndex = oldParent.getIndex() + 1;
             var sibling = ctrl.insertNode(gramps, node, newIndex)
-            ctrl.deleteNode(node.parent(), node)
+            ctrl.deleteNode(oldParent, node)
             m.redraw();
 
             ctrl.setFocus(sibling);
