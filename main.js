@@ -28,7 +28,15 @@ nodes.Node = function(name, value, children, parent){
   this.parent = m.prop(parent);
 
   // explicitly defined
-  this.condition = m.prop("AND");
+  this.condition = m.prop(null);
+  
+  this.getCondition = function(){
+    if(!this.condition() && this.parent()){
+      return this.parent().condition();
+    } else {
+      return m.prop("AND");
+    }
+  }
 
   this.getValue = function(){
     var func;
@@ -43,7 +51,7 @@ nodes.Node = function(name, value, children, parent){
         func = bools.XOR;
         break;
       default:
-        func = bools.ID;
+        func = bools.AND;
         break;
     }
 
@@ -309,7 +317,7 @@ app.view = function(ctrl){
           node.children().length > 1 ?
             m("select", {onchange: m.withAttr("value", node.condition)}, [
               _.map(bools, function(f, key){
-                return m("option", {selected: (key === "AND") ? true : false }, key);
+                return m("option", {selected: (key === node.getCondition()) ? true : false }, key);
               })
             ])
           : null
